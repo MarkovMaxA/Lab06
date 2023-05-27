@@ -9,29 +9,25 @@ import client.net.*
 import java.net.*
 fun main() {
     val commandManager = CommandManager()
-
+    
     val PORT=22837
 
-    commandManager.addCommand(AddCommand())
-    commandManager.addCommand(AddIfMaxCommand())
-    commandManager.addCommand(AddIfMinCommand())
-    commandManager.addCommand(RemoveByIdCommand())
+    var client = UDPClient(InetAddress.getLocalHost(), PORT)
+    
+    commandManager.addCommand(AddCommand(client))
+    commandManager.addCommand(AddIfMaxCommand(client))
+    commandManager.addCommand(AddIfMinCommand(client))
+    commandManager.addCommand(RemoveByIdCommand(client))
     commandManager.addCommand(ExitCommand())
-    commandManager.addCommand(HelpCommand())
-    commandManager.addCommand(InfoCommand())
-    commandManager.addCommand(MaxScreenwriterCommand())
-    commandManager.addCommand(PrintAscendingCommand())
-    commandManager.addCommand(PrintDescendingCommand())
-    commandManager.addCommand(RemoveLowerCommand())
-    commandManager.addCommand(ShowCommand())
-    commandManager.addCommand(UpdateCommand())
+    commandManager.addCommand(HelpCommand(client))
+    commandManager.addCommand(InfoCommand(client))
+    commandManager.addCommand(MaxScreenwriterCommand(client))
+    commandManager.addCommand(PrintAscendingCommand(client))
+    commandManager.addCommand(PrintDescendingCommand(client))
+    commandManager.addCommand(RemoveLowerCommand(client))
+    commandManager.addCommand(ShowCommand(client))
+    commandManager.addCommand(UpdateCommand(client))
     val runManager = RunManager(commandManager)
 
     runManager.run(commandManager)
-    try{
-        var client = UDPClient(InetAddress.getLocalHost(), PORT)
-    }
-    catch(e: Exception){
-        println("Невозможно подключиться к серверу.")
-    }
 }

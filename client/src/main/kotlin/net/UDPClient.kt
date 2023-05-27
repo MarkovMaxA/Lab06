@@ -5,11 +5,9 @@ import common.net.responses.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.SerializationUtils
-import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
-import java.nio.ByteBuffer.*
 import java.nio.*
 import java.nio.channels.DatagramChannel
 import java.util.Arrays
@@ -29,11 +27,10 @@ class UDPClient(address: InetAddress, private val port: Int) {
 
     }
 
-    fun sendAndReceiveCommand(request: Request): Response? {
-        val data =  Json.encodeToString(request).toByteArray()//SerializationUtils.serialize(request)
+    fun sendAndReceiveCommand(request: Request): Response {
+        val data = Json.encodeToString(request).toByteArray()//SerializationUtils.serialize(request)
         val responseBytes = sendAndReceiveData(data)
-        val response: Response = SerializationUtils.deserialize(responseBytes)
-        return response
+        return SerializationUtils.deserialize(responseBytes)
     }
 
     private fun sendData(data: ByteArray) {
