@@ -29,5 +29,6 @@ package common
     REMOVE_BY_ID,
     REMOVE_LOWER,
     SHOW,
-    UPDATE_BY_ID
+    UPDATE_BY_ID,
+    NONE
 }

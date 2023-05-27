@@ -14,7 +14,7 @@ class AddIfMaxCommand(private val movieManager: MovieManager): Command() {
      * Get information about command abstract method
      *
      * @return information about command [String]
-     * @author Berman Denis 2023
+     * @author Markov Maxim 2023
      */
     override fun getDescription() = "Command is adding element, if it's value more then maximum"
 
@@ -22,7 +22,7 @@ class AddIfMaxCommand(private val movieManager: MovieManager): Command() {
      * Get name of command abstract method
      *
      * @return name of command [String]
-     * @author Berman Denis 2023
+     * @author Markov Maxim 2023
      */
     override fun getName() = "add_if_max"
 
@@ -31,7 +31,7 @@ class AddIfMaxCommand(private val movieManager: MovieManager): Command() {
      *
      * @param request if it is needed [String]
      * @return none
-     * @author Berman Denis 2023
+     * @author Markov Maxim 2023
      */
     override fun execute(request: Request): Response {
         val req = request as? AddIfMaxRequest ?:

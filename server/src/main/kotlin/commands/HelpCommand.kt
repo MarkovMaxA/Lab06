@@ -26,7 +26,7 @@ class HelpCommand(private val commandManager: CommandManager): Command() {
     /**
      * Execute command abstract method.
      *
-     * @param argument if it is needed [String]
+     * @param request if it is needed [String]
      * @return none
      * @author Markov Maxim 2023
      */
