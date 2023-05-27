@@ -32,13 +32,13 @@ class PrintAscendingRequest(): Request(CommandID.PRINT_ASCENDING)
 class PrintDescendingRequest(): Request(CommandID.PRINT_DESCENDING)
 
 @Serializable
-class RemoveByIdRequest(val id: Int): Request(CommandID.REMOVE_BY_ID)
+class RemoveByIdRequest(val id: Long): Request(CommandID.REMOVE_BY_ID)
 
 @Serializable
-class RemoveLowerRequest(): Request(CommandID.REMOVE_LOWER)
+class RemoveLowerRequest(val oscarsCount: Long): Request(CommandID.REMOVE_LOWER)
 
 @Serializable
 class ShowRequest(): Request(CommandID.SHOW)
 
 @Serializable
-class UpdateByIdRequest(val id: Int, val movie: Movie): Request(CommandID.UPDATE_BY_ID)
+class UpdateByIdRequest(val movie: Movie): Request(CommandID.UPDATE_BY_ID)
