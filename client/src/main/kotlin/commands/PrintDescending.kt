@@ -10,6 +10,7 @@ class PrintDescendingCommand(val client: UDPClient): Command() {
     override fun getName() = "print_field_descending_oscars_count"
     override fun execute(argument: String?): Request {
         if (argument != null) throw CommandArgumentException("Method print_ascending don't support arguments")
+        val response = client.sendAndReceiveCommand(PrintDescendingRequest()) as AddResponse
         return PrintDescendingRequest()
 
     }

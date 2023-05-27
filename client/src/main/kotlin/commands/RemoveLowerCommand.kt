@@ -12,6 +12,7 @@ class RemoveLowerCommand(val client: UDPClient): Command() {
         if (argument == null) throw CommandArgumentException("Method remove_by_id don't support zero arguments")
 
         val id = argument.toLong()
+        val response = client.sendAndReceiveCommand(RemoveLowerRequest(id)) as AddResponse
         return RemoveLowerRequest(id)
     }
 }

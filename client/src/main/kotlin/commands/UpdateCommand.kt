@@ -5,6 +5,8 @@ import client.builders.MovieBuilder
 import client.net.UDPClient
 import common.net.requests.*
 import common.*
+import common.net.responses.UpdateByIdResponse
+
 class UpdateCommand(val client: UDPClient): Command() {
     override fun getName() = "update"
     override fun execute(argument: String?): Request {
@@ -12,6 +14,7 @@ class UpdateCommand(val client: UDPClient): Command() {
 
         val id = argument.toLong()
         val movie= MovieBuilder.build()
+        val response = client.sendAndReceiveCommand(UpdateByIdRequest(id,movie)) as UpdateByIdResponse
         return UpdateByIdRequest(id,movie)
     }
 }

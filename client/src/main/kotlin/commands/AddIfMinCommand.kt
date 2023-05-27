@@ -11,7 +11,8 @@ class AddIfMinCommand(val client: UDPClient): Command() {
     override fun execute(argument: String?): Request {
         if (argument != null) throw CommandArgumentException("Method add_if_min don't support arguments")
         val movie= MovieBuilder.build()
-        return AddIfMinRequest(movie)
+        val response = client.sendAndReceiveCommand(AddIfMaxRequest(movie)) as AddResponse
+        return AddIfMaxRequest(movie)
 
     }
 }

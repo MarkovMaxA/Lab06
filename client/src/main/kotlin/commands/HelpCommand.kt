@@ -10,6 +10,7 @@ class HelpCommand(val client: UDPClient): Command() {
     override fun getName() =  "help"
     override fun execute(argument: String?): Request {
         if (argument != null) throw CommandArgumentException("Method help don't support arguments")
+        val response = client.sendAndReceiveCommand(HelpRequest()) as AddResponse
         return HelpRequest()
 
     }

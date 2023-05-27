@@ -10,6 +10,7 @@ class InfoCommand(val client: UDPClient): Command() {
     override fun getName() =  "info"
     override fun execute(argument: String?): Request {
         if (argument != null) throw CommandArgumentException("Method info don't support arguments")
+        val response = client.sendAndReceiveCommand(InfoRequest()) as AddResponse
         return InfoRequest()
 
     }
