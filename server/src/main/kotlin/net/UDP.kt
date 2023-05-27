@@ -3,6 +3,8 @@ package net
 import commands.CommandManager
 import common.net.requests.Request
 import common.net.responses.Response
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.ArrayUtils
 import org.apache.commons.lang3.SerializationUtils
 import org.slf4j.LoggerFactory
@@ -73,6 +75,17 @@ abstract class UDP(var address: InetSocketAddress, val commandManager: CommandMa
                 logger.info("Created response $response")
             } catch (e: Exception) {
                 logger.error("Command error $e", e)
+                continue
+            }
+
+            val dataToSend = Json.encodeToString(response)
+            logger.info("Ответ: $response")
+
+            try {
+                send(dataToSend.toByteArray(), data.second!!)
+                logger.info("Отправлен ответ клиенту ${data.second}")
+            } catch (e: java.lang.Exception) {
+                logger.error("Ошибка ввода-вывода : $e", e)
             }
 
             disconnect()
