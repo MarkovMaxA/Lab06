@@ -213,7 +213,7 @@ class Movie {
      * Sreenwriter's name getter method
      *
      * @return movie id [Long]
-     * @author Berman Denis 2023
+     * @author Markov Maxim 2023
      */
     fun getScreenwriter() = this.screenWriter
 
@@ -232,6 +232,7 @@ class Movie {
      * @author Markov Maxim 2023
      */
     fun getCreationDate() = this.creationDate
+
 
     override fun toString(): String {
         return "ID: $id\nName: $name\nCoordinates: $coordinates\nCreation date: $creationDate\n" +
