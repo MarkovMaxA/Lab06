@@ -111,7 +111,7 @@ class MovieManager {
     fun load() {
         val lines = ArrayList<String>()
         val scanner = Scanner(Paths.get(fileName))
-        scanner.useDelimiter("\n")
+        scanner.useDelimiter("\r\n")
         while (scanner.hasNext()) {
             lines.add(scanner.next())
         }

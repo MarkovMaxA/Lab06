@@ -41,4 +41,4 @@ class RemoveLowerRequest(val oscarsCount: Long): Request(CommandID.REMOVE_LOWER)
 class ShowRequest(): Request(CommandID.SHOW)
 
 @Serializable
-class UpdateByIdRequest(val movie: Movie): Request(CommandID.UPDATE_BY_ID)
+class UpdateByIdRequest(val id: Long, val movie:Movie): Request(CommandID.UPDATE_BY_ID)
