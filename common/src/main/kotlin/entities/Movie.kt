@@ -158,6 +158,10 @@ class Movie {
         }
     }
 
+    fun setNewId(id: Long) {
+        this.id = id
+    }
+
     /**
      * Name getter method
      *
