@@ -4,4 +4,4 @@ import common.CommandID
 import kotlinx.serialization.Serializable
 
 @Serializable
-abstract class Request(val commandID: CommandID) : java.io.Serializable
+open class Request(val commandID: CommandID)

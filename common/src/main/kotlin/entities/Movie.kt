@@ -2,18 +2,13 @@ package common.entities
 
 import common.EmptyStringException
 import common.ValueLessThanZeroException
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import org.jetbrains.annotations.Nullable
+import kotlinx.serialization.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.max
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.*
 
 /**
  * Movie genres enum representative class
@@ -36,7 +31,9 @@ enum class MpaaRating {
     NC_17
 }
 
-class LocalDateSerializer : KSerializer<LocalDate> {
+@OptIn(ExperimentalSerializationApi::class)
+@Serializer(forClass = LocalDate::class)
+object LocalDateSerializer : KSerializer<LocalDate> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: LocalDate) {
@@ -49,21 +46,16 @@ class LocalDateSerializer : KSerializer<LocalDate> {
     }
 }
 
-@Serializable
+@Serializable(Movie.Companion::class)
 class Movie {
     private var name: String
     private var coordinates: Coordinates
-    @SerialName("oscarsCount")
-    @Nullable
     private var oscarsCount: Long?
     private var length: Int
     private var genre: MovieGenre
-    @SerialName("mpaaRating")
-    @Nullable
     private var mpaaRating: MpaaRating?
     private var screenWriter: Person
     private var id: Long
-    @Serializable(with = LocalDateSerializer::class)
     private var creationDate: LocalDate
 
     constructor(name: String, coordinates: Coordinates,
@@ -128,6 +120,8 @@ class Movie {
 
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
+    @Serializer(forClass = Movie::class)
     companion object {
         fun checkNameRestrictions(name: String) {
             if (name.isEmpty()) throw EmptyStringException("Movie name can't be empty")
@@ -155,6 +149,69 @@ class Movie {
         private fun giveId(): Long {
             cntId += 1
             return cntId
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        override fun serialize(encoder: Encoder, value: Movie) {
+            encoder.encodeStructure(descriptor) {
+                encodeStringElement(descriptor, 0, value.name)
+                encodeSerializableElement(descriptor, 1, Coordinates.serializer(), value.coordinates)
+                encodeNullableSerializableElement(descriptor, 2, Long.serializer(), value.oscarsCount)
+                encodeIntElement(descriptor, 3, value.length)
+                encodeStringElement(descriptor, 4, value.genre.name)
+                encodeNullableSerializableElement(descriptor, 5, String.serializer(), value.mpaaRating?.name)
+                encodeSerializableElement(descriptor, 6, Person.serializer(), value.screenWriter)
+                encodeLongElement(descriptor, 7, value.id)
+                encodeSerializableElement(descriptor, 8, LocalDateSerializer, value.creationDate)
+            }
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        override fun deserialize(decoder: Decoder): Movie {
+            return decoder.decodeStructure(descriptor) {
+                var name: String = ""
+                var coordinates: Coordinates = Coordinates(1f, 1.0)
+                var oscarsCount: Long? = null
+                var length: Int = 12
+                var genre: MovieGenre = MovieGenre.ACTION
+                var mpaaRating: MpaaRating? = null
+                var screenWriter: Person = Person("hj", 1, Color.BLACK, null)
+                var id: Long = 0
+                var creationDate: LocalDate = LocalDate.now()
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> name = decodeStringElement(descriptor, 0)
+                        1 -> coordinates = decodeSerializableElement(descriptor, 1, Coordinates.serializer())
+                        2 -> oscarsCount = decodeNullableSerializableElement(descriptor, 2, Long.serializer())
+                        3 -> length = decodeIntElement(descriptor, 3)
+                        4 -> genre = MovieGenre.valueOf(decodeStringElement(descriptor, 4))
+                        5 -> {
+                            val str = decodeNullableSerializableElement(descriptor, 5, String.serializer())
+                            mpaaRating = if (str != null)
+                                MpaaRating.valueOf(str)
+                            else null
+                        }
+                        6 -> screenWriter = decodeSerializableElement(descriptor, 6, Person.serializer())
+                        7 -> id = decodeLongElement(descriptor, 7)
+                        8 -> creationDate = decodeSerializableElement(descriptor, 8, LocalDateSerializer)
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
+                }
+                Movie(name, coordinates, oscarsCount, length, genre, mpaaRating, screenWriter, id, creationDate)
+            }
+        }
+
+        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Movie") {
+            element<String>("name")
+            element<Coordinates>("coordinates")
+            element<Long?>("oscarsCount")
+            element<Int>("length")
+            element<MovieGenre>("genre")
+            element<MpaaRating?>("mpaaRating")
+            element<Person>("screenwriter")
+            element<Long>("id")
+            element<String>("creationDate")
         }
     }
 

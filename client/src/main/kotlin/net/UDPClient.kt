@@ -1,5 +1,6 @@
 package client.net
 
+import common.CommandID
 import common.net.requests.*
 import common.net.responses.*
 import kotlinx.serialization.encodeToString
@@ -13,8 +14,8 @@ import java.nio.channels.DatagramChannel
 import java.util.Arrays
 
 class UDPClient(address: InetAddress, private val port: Int) {
-    private val PACKET_SIZE=1024
-    private val DATA_SIZE=1
+    private val PACKET_SIZE = 1024
+    private val DATA_SIZE = PACKET_SIZE - 1
     private var client: DatagramChannel? = null
     private val address: InetSocketAddress
 
@@ -28,9 +29,9 @@ class UDPClient(address: InetAddress, private val port: Int) {
     }
 
     fun sendAndReceiveCommand(request: Request): Response {
-        val data = Json.encodeToString(request).toByteArray()//SerializationUtils.serialize(request)
-        val responseBytes = sendAndReceiveData(data)
-        return SerializationUtils.deserialize(responseBytes)
+        //val data = SerializationUtils.serialize(request)
+        //val responseBytes = sendAndReceiveData(data)
+        return  Response(ResponseCode.FAIL, null, null, CommandID.NONE)// SerializationUtils.deserialize(responseBytes)
     }
 
     private fun sendData(data: ByteArray) {

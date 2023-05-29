@@ -2,7 +2,14 @@ package common.entities
 
 import common.EmptyStringException
 import common.ValueLessThanZeroException
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.encoding.*
 
 /**
  * Colors enum representative class
@@ -28,7 +35,7 @@ enum class Country {
 /**
  * Person representation class
  */
-@Serializable
+@Serializable(Person.Companion::class)
 class Person(private val name: String, private val height: Int,
              private val hairColor: Color, private val nationality: Country?) {
     init {
@@ -36,6 +43,8 @@ class Person(private val name: String, private val height: Int,
         checkHeightRestrictions(height)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
+    @Serializer(forClass = Person::class)
     companion object {
         @JvmStatic
         fun checkNameRestrictions(name: String) {
@@ -46,6 +55,50 @@ class Person(private val name: String, private val height: Int,
         @JvmStatic
         fun checkHeightRestrictions(height: Int) {
             if (height <= 0) throw ValueLessThanZeroException("Height can't be less than zero")
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        override fun serialize(encoder: Encoder, value: Person) {
+            encoder.encodeStructure(descriptor) {
+                encodeStringElement(descriptor, 0, value.name)
+                encodeIntElement(descriptor, 1, value.height)
+                encodeNullableSerializableElement(descriptor, 2, String.serializer(), value.nationality?.name)
+                encodeStringElement(descriptor, 3, value.hairColor.name)
+            }
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        override fun deserialize(decoder: Decoder): Person {
+            return decoder.decodeStructure(descriptor) {
+                var name: String = ""
+                var height: Int = 0
+                var nationality: Country? = null
+                var hairColor: Color = Color.BLACK
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> name = decodeStringElement(descriptor, 0)
+                        1 -> height = decodeIntElement(descriptor, 1)
+                        2 -> {
+                            val natString = decodeNullableSerializableElement(descriptor, 2, String.serializer())
+                            nationality = if (natString != null)
+                                Country.valueOf(natString)
+                            else
+                                null
+                        }
+                        3 -> hairColor = Color.valueOf(decodeStringElement(descriptor, 3))
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
+                }
+                Person(name, height, hairColor, nationality)
+            }
+        }
+
+        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Person") {
+            element<String>("name")
+            element<Int>("height")
+            element<Country?>("nationality")
+            element<Color>("hairColor")
         }
     }
 
