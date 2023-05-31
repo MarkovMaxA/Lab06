@@ -2,7 +2,17 @@ package common.net.responses
 
 import common.CommandID
 import common.entities.Movie
+import kotlinx.serialization.Serializable
 
+
+@Serializable
+data class UniqueCommandResponse(private val responseCodeC: ResponseCode,
+                                 private val messageC: String?,
+                                 private val exceptionDataC: String?,
+                                 val commandIDC: CommandID,
+                                val movie: Movie?,
+                                 val hashSetMovie: List<Movie>?,
+                                 val hashSetLong: List<Long?>?) : Response(responseCodeC, messageC, exceptionDataC, commandIDC)
 
 class AddResponse(private val responseCodeC: ResponseCode,
                   private val messageC: String?,

@@ -5,6 +5,8 @@ import common.entities.Movie
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class UniqueCommandRequest(val movie: Movie, val value: Long, val commandIDc: CommandID) : Request(commandIDc)
+
 data class AddRequest(val movie: Movie): Request(CommandID.ADD)
 
 class AddIfMaxRequest(val movie: Movie): Request(CommandID.ADDIFMAX)
