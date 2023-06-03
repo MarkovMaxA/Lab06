@@ -1,5 +1,6 @@
 package commands
 
+import common.CommandID
 import common.entities.Movie
 import common.entities.MovieManager
 import common.net.requests.*
@@ -30,10 +31,7 @@ class AddIfMinCommand(private val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? AddIfMinRequest ?:
-        return AddIfMaxResponse(ResponseCode.FAIL, null, "request cast error")
-
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
         return try {
             val minCount = movieManager.getMovieQueue().stream()
                 .map(Movie::getOscarsCount)
@@ -42,17 +40,18 @@ class AddIfMinCommand(private val movieManager: MovieManager): Command() {
                 .orElse(Long.MAX_VALUE)
 
             val id = movieManager.getMovieQueue().size
-            req.movie.setNewId(id.toLong() + 1)
+            request.movie!!.setNewId(id.toLong() + 1)
 
-            if ((req.movie.getOscarsCount() ?: -1) < minCount) {
-                movieManager.addMovie(req.movie)
-                AddIfMinResponse(ResponseCode.OK, "Movie added to collection with id = $id", null)
+            if ((request.movie!!.getOscarsCount() ?: -1) < minCount) {
+                movieManager.addMovie(request.movie!!)
+                UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = $id",
+                    commandIDC = CommandID.ADDIFMIN)
             } else {
-                AddIfMinResponse(ResponseCode.FAIL, null, "Movie oscars count isn't min. " +
-                        "Min value is $minCount")
+                UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = "Movie oscars count isn't min. " +
+                        "Min value is $minCount", commandIDC = CommandID.ADDIFMIN)
             }
         } catch (e: Exception) {
-            AddIfMaxResponse(ResponseCode.FAIL, null, e.toString())
+            UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = e.toString(), commandIDC = CommandID.ADDIFMIN)
         }
     }
 }

@@ -1,12 +1,11 @@
 package commands
 
+import common.CommandID
 import common.entities.Movie
 import common.entities.MovieManager
-import common.net.requests.PrintDescendingRequest
-import common.net.requests.Request
-import common.net.responses.PrintDescendingResponse
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
+import common.net.responses.UniqueCommandResponse
 
 class PrintDescendingCommand(private val movieManager: MovieManager): Command() {
     /**
@@ -32,15 +31,13 @@ class PrintDescendingCommand(private val movieManager: MovieManager): Command() 
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? PrintDescendingRequest ?:
-            return PrintDescendingResponse(ResponseCode.FAIL, null, "request cast error", null)
-
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
         val movies = movieManager.getMovieQueue()
         val sortedOscars = movies.stream()
             .map(Movie::getOscarsCount)
             .sorted(Comparator.comparingLong { (it ?: 0) * -1 })
 
-        return PrintDescendingResponse(ResponseCode.OK, "Descending sorted movies", null, sortedOscars.toList())
+        return UniqueCommandResponse(ResponseCode.OK, messageC = "Descending sorted movies",
+            commandIDC = CommandID.PRINT_DESCENDING, hashSetLong =  sortedOscars.toList())
     }
 }

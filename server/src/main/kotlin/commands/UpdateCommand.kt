@@ -1,11 +1,10 @@
 package commands
 
+import common.CommandID
 import common.entities.MovieManager
-import common.net.requests.Request
-import common.net.requests.UpdateByIdRequest
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
-import common.net.responses.UpdateByIdResponse
+import common.net.responses.UniqueCommandResponse
 
 class UpdateCommand(private val movieManager: MovieManager): Command() {
     /**
@@ -31,16 +30,23 @@ class UpdateCommand(private val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? UpdateByIdRequest ?:
-            return UpdateByIdResponse(ResponseCode.FAIL, null, "request cast error")
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
+        try {
+            movieManager.removeElementById(request.movie!!.getId())
 
-        movieManager.removeElementById(req.movie.getId())
-
-        return if (movieManager.removeElementById(req.movie.getId())) {
-            movieManager.addMovie(req.movie)
-            UpdateByIdResponse(ResponseCode.OK, "Element was updated", null)
+            return if (movieManager.removeElementById(request.movie!!.getId())) {
+                movieManager.addMovie(request.movie!!)
+                UniqueCommandResponse(
+                    ResponseCode.OK, messageC = "Element was updated",
+                    commandIDC = CommandID.UPDATE_BY_ID)
+            } else UniqueCommandResponse(
+                ResponseCode.FAIL, exceptionDataC = "Element wasn't updated",
+                commandIDC = CommandID.UPDATE_BY_ID)
+        } catch (e: Exception) {
+            return UniqueCommandResponse(
+                ResponseCode.FAIL, exceptionDataC = e.toString(),
+                commandIDC = CommandID.UPDATE_BY_ID
+            )
         }
-        else UpdateByIdResponse(ResponseCode.FAIL, null, "Element wasn't updated")
     }
 }

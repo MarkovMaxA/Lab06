@@ -1,11 +1,10 @@
 package commands
 
+import common.CommandID
 import common.entities.MovieManager
-import common.net.requests.RemoveByIdRequest
-import common.net.requests.Request
-import common.net.responses.RemoveByIdResponse
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
+import common.net.responses.UniqueCommandResponse
 
 class RemoveByIdCommand(private val movieManager: MovieManager): Command() {
     /**
@@ -31,14 +30,20 @@ class RemoveByIdCommand(private val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? RemoveByIdRequest ?:
-            return RemoveByIdResponse(ResponseCode.FAIL, null, "request cast error")
-
-        return if (movieManager.removeElementById(req.id))
-            RemoveByIdResponse(ResponseCode.OK,
-                "Element with id = ${req.id} was removed", null)
-        else RemoveByIdResponse(ResponseCode.FAIL, null,
-            "Element with id = ${req.id} wasn't removed")
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
+        return try {
+            if (movieManager.removeElementById(request.value!!))
+                UniqueCommandResponse(ResponseCode.OK,
+                    messageC = "Element with id = ${request.value!!} was removed",
+                    commandIDC = CommandID.REMOVE_BY_ID
+                )
+            else UniqueCommandResponse(ResponseCode.FAIL,
+                exceptionDataC = "Element with id = ${request.value!!} wasn't removed",
+                commandIDC = CommandID.REMOVE_BY_ID
+            )
+        } catch (e: Exception) {
+            UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = e.toString(),
+                commandIDC = CommandID.REMOVE_BY_ID)
+        }
     }
 }

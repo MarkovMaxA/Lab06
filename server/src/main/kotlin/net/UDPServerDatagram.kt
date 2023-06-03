@@ -1,33 +1,31 @@
 package net
 
 import commands.CommandManager
-import org.apache.commons.lang3.ArrayUtils
 import java.net.*
 import java.nio.ByteBuffer
-import java.util.*
+import kotlin.math.ceil
 
-class UDPServerDatagram(address: InetAddress, commandManager: CommandManager, val port: Int):
+class UDPServerDatagram(address: InetAddress, commandManager: CommandManager, port: Int):
     UDP(InetSocketAddress(address, port), commandManager) {
-    val PACKET_SIZE
+    private val PACKET_SIZE
         get() = 1024
-    val DATA_SIZE
+    private val DATA_SIZE
         get() = PACKET_SIZE - 1
 
-    val datagramSocket: DatagramSocket
+    private val datagramSocket: DatagramSocket = DatagramSocket(getAddr())
 
     init {
-        datagramSocket = DatagramSocket(getAddr())
         datagramSocket.reuseAddress = true
     }
 
-    override fun receive(): Pair<Array<Byte>, SocketAddress?> {
+    override fun receive(): Pair<ByteArray, SocketAddress?> {
         var receiveFlag = false
         var result = ByteArray(DATA_SIZE)
         var socketAddress: SocketAddress? = null
 
         while (!receiveFlag) {
             val data = ByteArray(PACKET_SIZE)
-            val datagramPacket = DatagramPacket(data, PACKET_SIZE);
+            val datagramPacket = DatagramPacket(data, PACKET_SIZE)
 
             datagramSocket.receive(datagramPacket)
             socketAddress = InetSocketAddress(datagramPacket.address, datagramPacket.port)
@@ -38,25 +36,24 @@ class UDPServerDatagram(address: InetAddress, commandManager: CommandManager, va
             }
             result = data.copyOf(data.size - 1)
         }
-        return Pair(ArrayUtils.toObject(result), socketAddress)
+        return Pair(result, socketAddress)
     }
 
     override fun send(data: ByteArray, address: SocketAddress) {
-        var dataSend = Array(Math.ceil(data.size / DATA_SIZE.toDouble()).toInt()) {ByteArray(DATA_SIZE)}
+        val dataSend = Array(ceil(data.size / DATA_SIZE.toDouble()).toInt()) {ByteArray(DATA_SIZE)}
 
         var start = 0
-        for (i in 0 until dataSend.size) {
-            dataSend[i] = Arrays.copyOfRange(data, start, start + DATA_SIZE)
+        for (i in dataSend.indices) {
+            dataSend[i] = data.copyOfRange(start, start + PACKET_SIZE)
             start += DATA_SIZE
         }
 
-        for (i in 0 until dataSend.size) {
+        for (i in dataSend.indices) {
             if (i != dataSend.size - 1) {
                 val datagramPacket = DatagramPacket(ByteBuffer.allocate(PACKET_SIZE).put(dataSend[i]).array(), PACKET_SIZE, address)
                 datagramSocket.send(datagramPacket)
             } else {
-                var last = dataSend[i] + (1).toByte()
-                val datagramPacket = DatagramPacket(last, PACKET_SIZE, address)
+                val datagramPacket = DatagramPacket(dataSend[i] + (1).toByte(), PACKET_SIZE, address)
                 datagramSocket.send(datagramPacket)
             }
         }

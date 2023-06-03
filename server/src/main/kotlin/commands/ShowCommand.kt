@@ -1,11 +1,10 @@
 package commands
 
+import common.CommandID
 import common.entities.MovieManager
-import common.net.requests.Request
-import common.net.requests.ShowRequest
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
-import common.net.responses.ShowResponse
+import common.net.responses.UniqueCommandResponse
 
 class ShowCommand(private val movieManager: MovieManager): Command() {
     /**
@@ -31,11 +30,8 @@ class ShowCommand(private val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? ShowRequest ?:
-            return ShowResponse(ResponseCode.FAIL, null, "request cast error", null)
-
-        return ShowResponse(ResponseCode.OK, "Movie set", null,
-            movieManager.getMovieQueue().toList())
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
+        return UniqueCommandResponse(ResponseCode.OK, messageC = "Movie set", commandIDC = CommandID.SHOW,
+            hashSetMovie = movieManager.getMovieQueue().toList())
     }
 }

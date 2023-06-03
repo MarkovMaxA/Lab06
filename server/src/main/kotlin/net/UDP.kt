@@ -1,23 +1,24 @@
 package net
 
 import commands.CommandManager
-import common.net.requests.Request
-import common.net.responses.Response
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import org.apache.commons.lang3.ArrayUtils
-import org.apache.commons.lang3.SerializationUtils
+import common.net.requests.*
+import common.net.responses.UniqueCommandResponse
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.protobuf.*
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 
 abstract class UDP(var address: InetSocketAddress, val commandManager: CommandManager) {
-    protected val logger = LoggerFactory.getLogger(UDP::class.java)
-    protected var runFlag = true
+    protected val logger: Logger = LoggerFactory.getLogger(UDP::class.java)
+    private var runFlag = true
 
     fun getAddr() = address
 
-    abstract fun receive(): Pair<Array<Byte>, SocketAddress?>
+    abstract fun receive(): Pair<ByteArray, SocketAddress?>
 
     abstract fun send(data: ByteArray, address: SocketAddress)
 
@@ -31,11 +32,12 @@ abstract class UDP(var address: InetSocketAddress, val commandManager: CommandMa
         runFlag = !runFlag
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun run() {
         logger.info("Server started, address=$address")
 
         while (runFlag) {
-            var data: Pair<Array<Byte>, SocketAddress?>
+            var data: Pair<ByteArray, SocketAddress?>
 
             try {
                 data = receive()
@@ -57,10 +59,10 @@ abstract class UDP(var address: InetSocketAddress, val commandManager: CommandMa
                 logger.error("Client connection error $e", e)
             }
 
-            val request: Request
+            val request: UniqueCommandRequest
 
             try {
-                request = SerializationUtils.deserialize(ArrayUtils.toPrimitive(data.first))
+                request = ProtoBuf.decodeFromByteArray(data.first)
                 logger.info("Request $request handle")
             } catch (e: Exception) {
                 logger.error("Unnable to serialize request $e", e)
@@ -68,7 +70,7 @@ abstract class UDP(var address: InetSocketAddress, val commandManager: CommandMa
                 continue
             }
 
-            val response: Response
+            val response: UniqueCommandResponse
 
             try {
                 response = commandManager.handle(request)
@@ -78,11 +80,11 @@ abstract class UDP(var address: InetSocketAddress, val commandManager: CommandMa
                 continue
             }
 
-            val dataToSend = Json.encodeToString(response)
+            val dataToSend = ProtoBuf.encodeToByteArray(response)
             logger.info("Ответ: $response")
 
             try {
-                send(dataToSend.toByteArray(), data.second!!)
+                send(dataToSend, data.second!!)
                 logger.info("Отправлен ответ клиенту ${data.second}")
             } catch (e: java.lang.Exception) {
                 logger.error("Ошибка ввода-вывода : $e", e)

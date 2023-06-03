@@ -1,13 +1,11 @@
 package commands
 
+import common.CommandID
 import common.entities.Movie
 import common.entities.MovieManager
-import common.net.requests.MaxScreenwriterRequest
-import common.net.requests.Request
-import common.net.responses.MaxScreenwriterResponse
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
-import java.util.*
+import common.net.responses.UniqueCommandResponse
 import kotlin.Comparator
 
 class MaxScreenwriterCommand(private val movieManager: MovieManager): Command() {
@@ -34,19 +32,16 @@ class MaxScreenwriterCommand(private val movieManager: MovieManager): Command() 
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? MaxScreenwriterRequest ?:
-            return MaxScreenwriterResponse(ResponseCode.FAIL, null, "request cast error", null)
-
-        val movies = movieManager.getMovieQueue()
-        var maxMovie: Movie? = movieManager.getMovieQueue().stream()
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
+        val maxMovie: Movie? = movieManager.getMovieQueue().stream()
             .max(Comparator.comparingInt { it.getScreenwriter().getHeight() })
             .orElse(null)
 
 
-        return if (maxMovie != null) MaxScreenwriterResponse(ResponseCode.OK, "Found maxscreenwriter heigh movie",
-            null, maxMovie)
-        else MaxScreenwriterResponse(ResponseCode.FAIL, "There's is no movie with maxscreenwriter",
-            null, null)
+        return if (maxMovie != null) UniqueCommandResponse(ResponseCode.OK,
+            messageC = "Found maxscreenwriter height movie",
+            commandIDC = CommandID.MAX_SCREENWRITER, movie = maxMovie)
+        else UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = "There's is no movie with maxscreenwriter",
+            commandIDC = CommandID.MAX_SCREENWRITER)
     }
 }

@@ -1,8 +1,8 @@
 package commands
 
+import common.CommandID
 import common.entities.MovieManager
-import common.net.requests.InfoRequest
-import common.net.requests.Request
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.*
 
 /**
@@ -32,13 +32,10 @@ class InfoCommand(private val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? InfoRequest ?:
-            return InfoResponse(ResponseCode.FAIL, null, "request cast error")
-
-        return HelpResponse(ResponseCode.OK, "Class: " + movieManager.getCollectionClass() + "\n" +
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
+        return UniqueCommandResponse(ResponseCode.OK, messageC = "Class: " + movieManager.getCollectionClass() + "\n" +
                 "Creation date: " + movieManager.getCreationDate() + "\n" +
                 "Number of elements: " + movieManager.getCollectionNumberOfElements() + "\n",
-                null)
+                commandIDC = CommandID.INFO)
     }
 }

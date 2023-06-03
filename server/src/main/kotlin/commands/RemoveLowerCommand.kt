@@ -1,12 +1,11 @@
 package commands
 
+import common.CommandID
 import common.entities.Movie
 import common.entities.MovieManager
-import common.net.requests.RemoveLowerRequest
-import common.net.requests.Request
-import common.net.responses.RemoveLowerResponse
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
+import common.net.responses.UniqueCommandResponse
 
 class RemoveLowerCommand(private val movieManager: MovieManager): Command() {
     /**
@@ -32,21 +31,17 @@ class RemoveLowerCommand(private val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? RemoveLowerRequest ?:
-            return RemoveLowerResponse(ResponseCode.FAIL, null, "request cast error")
-
-
-        val oscarsCount = req.oscarsCount
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
+        val oscarsCount = request.value
 
         val movieList = movieManager.getMovieQueue().stream()
-            .filter {(it.getOscarsCount() ?: 0) < oscarsCount}
+            .filter {(it.getOscarsCount() ?: 0) < (oscarsCount ?: 0)}
             .map(Movie::getId)
 
         movieList.forEach{movieManager.removeElementById(it)}
 
-        return RemoveLowerResponse(ResponseCode.OK,
-            "All movies with oscars count value less than ${req.oscarsCount} were removed",
-            null)
+        return UniqueCommandResponse(ResponseCode.OK,
+            "All movies with oscars count value less than ${request.value} were removed",
+            commandIDC = CommandID.REMOVE_LOWER)
     }
 }

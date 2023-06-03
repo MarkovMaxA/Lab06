@@ -1,12 +1,11 @@
 package commands
 
+import common.CommandID
 import common.entities.Movie
 import common.entities.MovieManager
-import common.net.requests.AddIfMaxRequest
-import common.net.requests.Request
-import common.net.responses.AddIfMaxResponse
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
+import common.net.responses.UniqueCommandResponse
 import java.lang.Exception
 
 class AddIfMaxCommand(private val movieManager: MovieManager): Command() {
@@ -33,10 +32,7 @@ class AddIfMaxCommand(private val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? AddIfMaxRequest ?:
-        return AddIfMaxResponse(ResponseCode.FAIL, null, "request cast error")
-
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
         return try {
             val maxCount = movieManager.getMovieQueue().stream()
                 .map(Movie::getOscarsCount)
@@ -45,17 +41,18 @@ class AddIfMaxCommand(private val movieManager: MovieManager): Command() {
                 .orElse(-1)
 
             val id = movieManager.getMovieQueue().size
-            req.movie.setNewId(id.toLong() + 1)
+            request.movie!!.setNewId(id.toLong() + 1)
 
-            if ((req.movie.getOscarsCount() ?: -1) > maxCount) {
-                movieManager.addMovie(req.movie)
-                AddIfMaxResponse(ResponseCode.OK, "Movie added to collection with id = $id", null)
+            if ((request.movie!!.getOscarsCount() ?: -1) > maxCount) {
+                movieManager.addMovie(request.movie!!)
+                UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = $id",
+                    commandIDC = CommandID.ADDIFMAX)
             } else {
-                AddIfMaxResponse(ResponseCode.FAIL, null, "Movie oscars count isn't max. " +
-                        "Max value is $maxCount")
+                UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = "Movie oscars count isn't max. " +
+                        "Max value is $maxCount", commandIDC = CommandID.ADDIFMAX)
             }
         } catch (e: Exception) {
-            AddIfMaxResponse(ResponseCode.FAIL, null, e.toString())
+            UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = e.toString(), commandIDC = CommandID.ADDIFMAX)
         }
     }
 }

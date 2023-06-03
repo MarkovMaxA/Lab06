@@ -7,12 +7,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UniqueCommandResponse(private val responseCodeC: ResponseCode,
-                                 private val messageC: String?,
-                                 private val exceptionDataC: String?,
+                                 private val messageC: String? = null,
+                                 private val exceptionDataC: String? = null,
                                  val commandIDC: CommandID,
-                                val movie: Movie?,
-                                 val hashSetMovie: List<Movie>?,
-                                 val hashSetLong: List<Long?>?) : Response(responseCodeC, messageC, exceptionDataC, commandIDC)
+                                val movie: Movie? = null,
+                                 val hashSetMovie: List<Movie>? = null,
+                                 val hashSetLong: List<Long?>? = null) : Response(responseCodeC, messageC, exceptionDataC, commandIDC)
 
 class AddResponse(private val responseCodeC: ResponseCode,
                   private val messageC: String?,

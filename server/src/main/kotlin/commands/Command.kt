@@ -1,7 +1,7 @@
 package commands
 
-import common.net.requests.Request
-import common.net.responses.Response
+import common.net.requests.UniqueCommandRequest
+import common.net.responses.UniqueCommandResponse
 
 /**
  * Execution command representative interface
@@ -31,5 +31,5 @@ abstract class Command {
      * @return none
      * @author Markov Maxim 2023
      */
-    abstract fun execute(request: Request): Response
+    abstract fun execute(request: UniqueCommandRequest): UniqueCommandResponse
 }

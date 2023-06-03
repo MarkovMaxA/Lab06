@@ -1,10 +1,9 @@
 package commands
 
-import common.net.requests.HelpRequest
-import common.net.requests.Request
-import common.net.responses.HelpResponse
-import common.net.responses.Response
+import common.CommandID
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.ResponseCode
+import common.net.responses.UniqueCommandResponse
 
 class HelpCommand(private val commandManager: CommandManager): Command() {
     /**
@@ -30,15 +29,10 @@ class HelpCommand(private val commandManager: CommandManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? HelpRequest ?:
-        return HelpResponse(ResponseCode.FAIL, null, "request cast error")
-
-        val commands = commandManager.getCommands()
-
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
         val outString = StringBuilder()
 
         commandManager.getCommands().values.forEach { outString.append("${it.getName()} - ${it.getDescription()}\n\n")}
-        return HelpResponse(ResponseCode.OK, outString.toString(), null)
+        return UniqueCommandResponse(ResponseCode.OK, messageC = outString.toString(), commandIDC = CommandID.HELP)
     }
 }

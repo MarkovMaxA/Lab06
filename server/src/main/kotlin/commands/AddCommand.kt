@@ -1,5 +1,6 @@
 package commands
 
+import common.CommandID
 import common.entities.MovieManager
 import common.net.requests.*
 import common.net.responses.*
@@ -29,18 +30,16 @@ class AddCommand(val movieManager: MovieManager): Command() {
      * @return none
      * @author Markov Maxim 2023
      */
-    override fun execute(request: Request): Response {
-        val req = request as? AddRequest ?:
-            return AddResponse(ResponseCode.FAIL, null, "request cast error")
-
+    override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
         return try {
             val id = movieManager.getMovieQueue().size
 
-            req.movie.setNewId(id.toLong() + 1)
-            movieManager.addMovie(req.movie)
-            AddResponse(ResponseCode.OK, "Movie added to collection with id = $id", null)
+            request.movie!!.setNewId(id.toLong() + 1)
+            movieManager.addMovie(request.movie!!)
+            UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = $id",
+                commandIDC = CommandID.ADD)
         } catch (e: Exception) {
-            AddResponse(ResponseCode.FAIL, null, e.toString())
+            UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = e.toString(), commandIDC = CommandID.ADD)
         }
     }
 }

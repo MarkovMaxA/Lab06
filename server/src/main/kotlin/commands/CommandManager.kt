@@ -2,8 +2,10 @@ package commands
 
 import common.CommandID
 import common.net.requests.Request
+import common.net.requests.UniqueCommandRequest
 import common.net.responses.Response
 import common.net.responses.ResponseCode
+import common.net.responses.UniqueCommandResponse
 
 class CommandManager {
     private val commands = HashMap<CommandID, Command>() // map of commands
@@ -34,9 +36,10 @@ class CommandManager {
      * @return response to send [Response]
      * @author Markov Maxim 2023
      */
-    fun handle(request: Request): Response {
+    fun handle(request: UniqueCommandRequest): UniqueCommandResponse {
         val command = commands[request.commandID] ?:
-            return Response(ResponseCode.FAIL, "", "No such command", CommandID.NONE)
+            return UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = "No such command",
+                commandIDC = CommandID.NONE)
         return command.execute(request)
     }
 }
