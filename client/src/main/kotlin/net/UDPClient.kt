@@ -1,13 +1,9 @@
 package client.net
 
-import common.CommandID
 import common.net.requests.*
 import common.net.responses.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToByteArray
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import org.apache.commons.lang3.SerializationUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.InetAddress
@@ -17,11 +13,11 @@ import java.nio.*
 import java.nio.channels.DatagramChannel
 import java.util.Arrays
 import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.*
+import java.math.BigInteger
 
 @OptIn(ExperimentalSerializationApi::class)
-class UDPClient(address: InetAddress, private val port: Int) {
+class UDPClient(address: InetAddress, port: Int) {
     private val PACKET_SIZE = 1024
     private val DATA_SIZE = PACKET_SIZE - 1
     private var client: DatagramChannel? = null
@@ -40,12 +36,10 @@ class UDPClient(address: InetAddress, private val port: Int) {
 
     }
 
-    fun sendAndReceiveCommand(request: Request): Response {
-        var data: Pair<ByteArray, SocketAddress?>
+    fun sendAndReceiveCommand(request: UniqueCommandRequest): UniqueCommandResponse {
         val dataToSend= ProtoBuf.encodeToByteArray(request)
         sendData(dataToSend)
-        val response=ProtoBuf.decodeFromByteArray<Response>(receiveData())
-        return response
+        return ProtoBuf.decodeFromByteArray<UniqueCommandResponse>(receiveData())
     }
 
     private fun sendData(data: ByteArray) {
@@ -56,21 +50,26 @@ class UDPClient(address: InetAddress, private val port: Int) {
         }
         var start = 0
         for (i in ret.indices) {
+            if (i == 0) {
+                val dataSize = ByteBuffer.allocate(4)
+                dataSize.putInt(data.size)
+                ret[i] = dataSize.array() + Arrays.copyOfRange(data, start, start + DATA_SIZE - 4)
+                start += DATA_SIZE - 4
+                continue
+            }
             ret[i] = Arrays.copyOfRange(data, start, start + DATA_SIZE)
             start += DATA_SIZE
         }
         for (i in ret.indices) {
-            val chunk= ret[i]
-            println(chunk)
+            val chunk = ret[i]
             if (i == ret.size - 1) {
-                var lastChunk = chunk + byteArrayOf(1)
+                val lastChunk = chunk + byteArrayOf(1)
                 client!!.send(ByteBuffer.wrap(lastChunk), address)
             } else {
                 val answer = chunk + byteArrayOf(0)
                 client!!.send(ByteBuffer.wrap(answer), address)
             }
         }
-
     }
 
 
@@ -78,16 +77,18 @@ class UDPClient(address: InetAddress, private val port: Int) {
         var received = false
         var result = ByteArray(0)
         while (!received) {
-            val data = receiveData(PACKET_SIZE)
+            val data = receiveDataFromServer(PACKET_SIZE)
+
             if (data[data.size - 1].toInt() == 1) {
                 received = true
             }
-            result = Arrays.copyOf(data, data.size - 1)
+            result += Arrays.copyOf(data, data.size - 1)
         }
-        return result
+        val size = BigInteger(1, result.copyOf(4)).toInt()
+        return result.copyOfRange(4, 4 + size)
     }
 
-    private fun receiveData(bufferSize: Int): ByteArray {
+    private fun receiveDataFromServer(bufferSize: Int): ByteArray {
         val buffer = ByteBuffer.allocate(bufferSize)
         var address: SocketAddress? = null
         while (address == null) {
@@ -95,9 +96,12 @@ class UDPClient(address: InetAddress, private val port: Int) {
         }
         return buffer.array()
     }
+    /*
     private fun sendAndReceiveData(data: ByteArray): ByteArray {
+
         sendData(data)
         return receiveData()
     }
+    */
 
 }

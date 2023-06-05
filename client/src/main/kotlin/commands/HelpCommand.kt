@@ -1,7 +1,6 @@
 package client.commands
 
 
-import client.builders.MovieBuilder
 import client.net.UDPClient
 import common.net.requests.*
 import common.net.responses.*
@@ -12,6 +11,5 @@ class HelpCommand(val client: UDPClient): Command() {
         if (argument != null) throw CommandArgumentException("Method help don't support arguments")
         val response = client.sendAndReceiveCommand(UniqueCommandRequest(commandIDc = CommandID.HELP))
         return response
-
     }
 }
