@@ -1,8 +1,11 @@
 package client.run
 
+import ch.qos.logback.core.net.server.Client
 import client.commands.Command
 import client.console.ConsoleManager
+import client.net.UDPClient
 import commands.CommandManager
+import common.net.responses.Response
 
 /**
  * Command execution code
@@ -16,7 +19,7 @@ enum class ExecutionCode {
 /**
  * Progrum runtime representative class
  */
-class RunManager(private val commandManager: CommandManager) {
+class RunManager(private val commandManager: CommandManager,private val client: UDPClient) {
     /**
      * run method
      *
@@ -29,45 +32,38 @@ class RunManager(private val commandManager: CommandManager) {
             val tokens = line.split(" ")
 
             val command = commandManager.getCommands()[tokens[0]]
-
-            val executionCode = if (tokens.size > 1) commandExecution(command, tokens[1])
-            else commandExecution(command, null)
-
-            if (executionCode == ExecutionCode.EXCEPTION) ConsoleManager.consolePrint("Something went wrong:((\n")
-            else if (executionCode == ExecutionCode.NO_COMMAND) ConsoleManager.consolePrint("There's no command ${tokens[0]}\n")
+            try{
+                val executionResponse = if (tokens.size > 1) commandExecute(command!!, tokens[1])
+                else commandExecute(command!!, null)
+            }
+            catch(e: Exception){
+                var executionCode=ExecutionCode.EXCEPTION
+                ConsoleManager.consolePrint(e.javaClass.simpleName + "\n")
+            }
         }
     }
-    fun runLine(line: String){
-        val tokens = line.split(" ")
-
-        if (tokens.isEmpty()) {
-            println("Something went wrong:(")
-        }
-        val command = commandManager.getCommands()[tokens[0]]
-
-        val executionCode = if (tokens.size > 1) commandExecution(command, tokens[1])
-        else commandExecution(command, null)
-
-        if (executionCode == ExecutionCode.EXCEPTION) println("Something went wrong:((")
-        else if (executionCode == ExecutionCode.NO_COMMAND) println("There's no command $tokens")
-
-    }
+//    fun runLine(line: String){
+//        val tokens = line.split(" ")
+//
+//        if (tokens.isEmpty()) {
+//            println("Something went wrong:(")
+//        }
+//        val command = commandManager.getCommands()[tokens[0]]
+//
+//        val executionCode = if (tokens.size > 1) commandExecution(command, tokens[1])
+//        else commandExecution(command, null)
+//
+//        if (executionCode == ExecutionCode.EXCEPTION) println("Something went wrong:((")
+//        else if (executionCode == ExecutionCode.NO_COMMAND) println("There's no command $tokens")
+//
+//    }
     /**
      * command execution method
      *
      * @argument command to execute [Command]
      * @author Markov Maxim 2023
      */
-    private fun commandExecution(command: Command?, argument: String?): ExecutionCode {
-        if (command == null) {
-            return ExecutionCode.NO_COMMAND
-        }
-        try {
-            if (command.execute(argument)!=null) return ExecutionCode.COMPLETED
-        } catch (e: Exception) {
-            ConsoleManager.consolePrint(e.javaClass.simpleName + "\n")
-            return ExecutionCode.EXCEPTION
-        }
-        return ExecutionCode.EXCEPTION
+    private fun commandExecute(command: Command, argument: String?): Response {
+        return command.execute(argument)
     }
 }

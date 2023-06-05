@@ -34,6 +34,7 @@ class UDPServerDatagram(address: InetAddress, commandManager: CommandManager, po
                 receiveFlag = true
                 logger.info("Data received from ${datagramPacket.address}")
             }
+            println(data)
             result = data.copyOf(data.size - 1)
         }
         return Pair(result, socketAddress)

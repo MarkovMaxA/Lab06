@@ -13,7 +13,7 @@ data class UniqueCommandResponse(private val responseCodeC: ResponseCode,
                                 val movie: Movie? = null,
                                  val hashSetMovie: List<Movie>? = null,
                                  val hashSetLong: List<Long?>? = null) : Response(responseCodeC, messageC, exceptionDataC, commandIDC)
-
+@Serializable
 class AddResponse(private val responseCodeC: ResponseCode,
                   private val messageC: String?,
                   private val exceptionDataC: String?): Response(responseCodeC, messageC, exceptionDataC, CommandID.ADD)

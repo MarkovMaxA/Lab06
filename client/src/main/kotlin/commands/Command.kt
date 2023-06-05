@@ -1,6 +1,7 @@
 package client.commands
 
 import common.net.requests.*
+import common.net.responses.Response
 
 /**
  * Execution command representative interface
@@ -8,5 +9,5 @@ import common.net.requests.*
 abstract class Command {
     abstract fun getName(): String
 
-    abstract fun execute(argument: String?): Request
+    abstract fun execute(argument: String?): Response
 }

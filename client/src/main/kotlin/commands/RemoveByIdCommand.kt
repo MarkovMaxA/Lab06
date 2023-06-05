@@ -8,11 +8,11 @@ import common.net.responses.*
 import common.*
 class RemoveByIdCommand(val client: UDPClient): Command() {
     override fun getName() = "remove_by_id"
-    override fun execute(argument: String?): Request {
+    override fun execute(argument: String?): Response {
         if (argument == null) throw CommandArgumentException("Method remove_by_id don't support zero arguments")
 
         val id = argument.toLong()
-        val response = client.sendAndReceiveCommand(RemoveByIdRequest(id)) as AddResponse
-        return RemoveByIdRequest(id)
+        val response = client.sendAndReceiveCommand(UniqueCommandRequest(commandIDc = CommandID.REMOVE_BY_ID))
+        return response
     }
 }

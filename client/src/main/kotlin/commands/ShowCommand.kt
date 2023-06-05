@@ -8,10 +8,10 @@ import common.net.responses.*
 import common.*
 class ShowCommand(val client: UDPClient): Command() {
     override fun getName() = "show"
-    override fun execute(argument: String?): Request {
+    override fun execute(argument: String?): Response {
         if (argument != null) throw CommandArgumentException("Method show don't support arguments")
-        val response = client.sendAndReceiveCommand(ShowRequest()) as AddResponse
-        return ShowRequest()
+        val response = client.sendAndReceiveCommand(UniqueCommandRequest(commandIDc = CommandID.SHOW))
+        return response
 
     }
 }

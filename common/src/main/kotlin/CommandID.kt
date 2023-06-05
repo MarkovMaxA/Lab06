@@ -30,5 +30,6 @@ package common
     REMOVE_LOWER,
     SHOW,
     UPDATE_BY_ID,
+    EXIT,
     NONE
 }

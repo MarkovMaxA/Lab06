@@ -18,10 +18,10 @@ class AddCommand(val client: UDPClient): Command() {
      * @return none
      * @author Berman Denis
      */
-    override fun execute(argument: String?): Request {
+    override fun execute(argument: String?): Response {
         if (argument != null) throw CommandArgumentException("Method add don't support arguments")
         val movie= MovieBuilder.build()
-        val response = client.sendAndReceiveCommand(AddRequest(movie)) as AddResponse
-        return AddRequest(movie)
+        val response = client.sendAndReceiveCommand(UniqueCommandRequest(commandIDc = CommandID.ADD))
+        return response
     }
 }

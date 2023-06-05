@@ -3,21 +3,31 @@ package client.net
 import common.CommandID
 import common.net.requests.*
 import common.net.responses.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.SerializationUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.nio.*
 import java.nio.channels.DatagramChannel
 import java.util.Arrays
+import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.protobuf.*
 
+@OptIn(ExperimentalSerializationApi::class)
 class UDPClient(address: InetAddress, private val port: Int) {
     private val PACKET_SIZE = 1024
     private val DATA_SIZE = PACKET_SIZE - 1
     private var client: DatagramChannel? = null
     private val address: InetSocketAddress
+    private val logger: Logger = LoggerFactory.getLogger(UDPClient::class.java)
+
 
     init {
         this.address = InetSocketAddress(address, port)
@@ -25,13 +35,17 @@ class UDPClient(address: InetAddress, private val port: Int) {
     fun SetConnection(){
         client = DatagramChannel.open().bind(null).connect(address)
         client!!.configureBlocking(false)
+        logger.info("client connected to the server, address=$address")
+
 
     }
 
     fun sendAndReceiveCommand(request: Request): Response {
-        //val data = SerializationUtils.serialize(request)
-        //val responseBytes = sendAndReceiveData(data)
-        return  Response(ResponseCode.FAIL, null, null, CommandID.NONE)// SerializationUtils.deserialize(responseBytes)
+        var data: Pair<ByteArray, SocketAddress?>
+        val dataToSend= ProtoBuf.encodeToByteArray(request)
+        sendData(dataToSend)
+        val response=ProtoBuf.decodeFromByteArray<Response>(receiveData())
+        return response
     }
 
     private fun sendData(data: ByteArray) {
@@ -46,7 +60,8 @@ class UDPClient(address: InetAddress, private val port: Int) {
             start += DATA_SIZE
         }
         for (i in ret.indices) {
-            val chunk = ret[i]
+            val chunk= ret[i]
+            println(chunk)
             if (i == ret.size - 1) {
                 var lastChunk = chunk + byteArrayOf(1)
                 client!!.send(ByteBuffer.wrap(lastChunk), address)

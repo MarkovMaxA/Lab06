@@ -18,7 +18,7 @@ fun main() {
     commandManager.addCommand(AddIfMaxCommand(client))
     commandManager.addCommand(AddIfMinCommand(client))
     commandManager.addCommand(RemoveByIdCommand(client))
-    commandManager.addCommand(ExitCommand())
+    commandManager.addCommand(ExitCommand(client))
     commandManager.addCommand(HelpCommand(client))
     commandManager.addCommand(InfoCommand(client))
     commandManager.addCommand(MaxScreenwriterCommand(client))
@@ -27,7 +27,8 @@ fun main() {
     commandManager.addCommand(RemoveLowerCommand(client))
     commandManager.addCommand(ShowCommand(client))
     commandManager.addCommand(UpdateCommand(client))
-    val runManager = RunManager(commandManager)
+    val runManager = RunManager(commandManager,client)
 
+    client.SetConnection()
     runManager.run(commandManager)
 }
