@@ -5,6 +5,7 @@ import net.UDPServerDatagram
 import java.net.InetAddress
 import kotlinx.coroutines.*
 
+@OptIn(DelicateCoroutinesApi::class)
 fun main() = runBlocking {
 
     val movieManager = MovieManager()
@@ -33,11 +34,19 @@ fun main() = runBlocking {
 //    val thread = launch {
 //        val controller = ServerController(movieManager, server)
 //        controller.run()
+//
 //    }
-    try {
-        server.run()
-    } catch (e: Exception) {
-        return@runBlocking
+    val controller = ServerController(movieManager, server)
+    var checker = false
+    GlobalScope.launch { server.run() }
+
+
+    while (!checker) {
+        val input = readlnOrNull()
+
+        if (input != null) {
+            runBlocking { checker = controller.run(input) }
+        }
     }
     // thread.join()
 }
