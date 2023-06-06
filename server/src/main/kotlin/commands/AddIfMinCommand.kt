@@ -39,12 +39,11 @@ class AddIfMinCommand(private val movieManager: MovieManager): Command() {
                 .min()
                 .orElse(Long.MAX_VALUE)
 
-            val id = movieManager.getMovieQueue().size
-            request.movie!!.setNewId(id.toLong() + 1)
+            request.movie!!.setNewId(movieManager.giveId())
 
             if ((request.movie!!.getOscarsCount() ?: -1) < minCount) {
                 movieManager.addMovie(request.movie!!)
-                UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = $id",
+                UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = ${request.movie!!.getId()}",
                     commandIDC = CommandID.ADDIFMIN)
             } else {
                 UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = "Movie oscars count isn't min. " +

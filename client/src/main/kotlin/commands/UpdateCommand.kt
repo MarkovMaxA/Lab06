@@ -6,7 +6,6 @@ import client.net.UDPClient
 import common.net.requests.*
 import common.*
 import common.net.responses.Response
-import common.net.responses.UpdateByIdResponse
 
 class UpdateCommand(val client: UDPClient): Command() {
     override fun getName() = "update"
@@ -14,8 +13,7 @@ class UpdateCommand(val client: UDPClient): Command() {
         if (argument == null) throw CommandArgumentException("Method remove_by_id don't support zero arguments")
 
         val id = argument.toLong()
-        val movie= MovieBuilder.build()
-        val response = client.sendAndReceiveCommand(UniqueCommandRequest(commandIDc = CommandID.UPDATE_BY_ID))
-        return response
+        val movie = MovieBuilder.build()
+        return client.sendAndReceiveCommand(UniqueCommandRequest(commandIDc = CommandID.UPDATE_BY_ID, value = id, movie = movie))
     }
 }

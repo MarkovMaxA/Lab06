@@ -32,9 +32,8 @@ class UpdateCommand(private val movieManager: MovieManager): Command() {
      */
     override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
         try {
-            movieManager.removeElementById(request.movie!!.getId())
-
-            return if (movieManager.removeElementById(request.movie!!.getId())) {
+            return if (movieManager.removeElementById(request.value!!)) {
+                request.movie!!.setNewId(request.value!!)
                 movieManager.addMovie(request.movie!!)
                 UniqueCommandResponse(
                     ResponseCode.OK, messageC = "Element was updated",

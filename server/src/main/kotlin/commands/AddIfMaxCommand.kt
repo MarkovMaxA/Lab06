@@ -40,12 +40,11 @@ class AddIfMaxCommand(private val movieManager: MovieManager): Command() {
                 .max()
                 .orElse(-1)
 
-            val id = movieManager.getMovieQueue().size
-            request.movie!!.setNewId(id.toLong() + 1)
+            request.movie!!.setNewId(movieManager.giveId())
 
             if ((request.movie!!.getOscarsCount() ?: -1) > maxCount) {
                 movieManager.addMovie(request.movie!!)
-                UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = $id",
+                UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = ${request.movie!!.getId()}",
                     commandIDC = CommandID.ADDIFMAX)
             } else {
                 UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = "Movie oscars count isn't max. " +

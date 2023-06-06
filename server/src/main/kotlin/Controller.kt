@@ -3,7 +3,6 @@ import net.*
 
 class ServerController(private val movieManager: MovieManager, private val server: UDP) {
     fun run(line: String): Boolean {
-        println(line)
         if (line == "exit") {
             server.stop()
             return true

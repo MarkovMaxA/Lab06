@@ -32,11 +32,9 @@ class AddCommand(val movieManager: MovieManager): Command() {
      */
     override fun execute(request: UniqueCommandRequest): UniqueCommandResponse {
         return try {
-            val id = movieManager.getMovieQueue().size
-
-            request.movie!!.setNewId(id.toLong() + 1)
+            request.movie!!.setNewId(movieManager.giveId())
             movieManager.addMovie(request.movie!!)
-            UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = $id",
+            UniqueCommandResponse(ResponseCode.OK, messageC = "Movie added to collection with id = ${request.movie!!.getId()}",
                 commandIDC = CommandID.ADD)
         } catch (e: Exception) {
             UniqueCommandResponse(ResponseCode.FAIL, exceptionDataC = e.toString(), commandIDC = CommandID.ADD)

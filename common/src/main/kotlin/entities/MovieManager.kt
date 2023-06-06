@@ -16,8 +16,9 @@ import kotlin.collections.HashSet
 class MovieManager {
     private val movieQueue: HashSet<Movie> = HashSet()
     private val creationDate: LocalDate = LocalDate.now()
-    private val maxElements = 3
+    private val maxElements = 10000
     private var fileName: String? = null
+    private val idSet = HashSet<Long>()
 
     /**
      * Get movie queue method
@@ -55,12 +56,22 @@ class MovieManager {
             }
         }
 
+
         if (elementToDelete != null) {
             movieQueue.remove(elementToDelete)
+            idSet.add(elementToDelete.getId())
             return true
         }
 
         return false
+    }
+
+    fun giveId(): Long {
+        if (idSet.size == 0) {
+            return movieQueue.size.toLong() + 1
+        }
+
+        return idSet.iterator().next()
     }
 
     /**
