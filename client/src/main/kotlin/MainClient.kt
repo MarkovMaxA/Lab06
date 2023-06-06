@@ -1,11 +1,9 @@
 package client
 
 import client.net.UDPClient
-import client.console.*
 import client.commands.*
 import commands.CommandManager
 import client.run.*
-import client.net.*
 import java.net.*
 fun main() {
     val commandManager = CommandManager()

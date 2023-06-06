@@ -5,7 +5,9 @@ import client.commands.Command
 import client.console.ConsoleManager
 import client.net.UDPClient
 import commands.CommandManager
+import common.CommandID
 import common.net.responses.Response
+import common.net.responses.ResponseCode
 
 /**
  * Command execution code
@@ -35,6 +37,7 @@ class RunManager(private val commandManager: CommandManager,private val client: 
             try{
                 val executionResponse = if (tokens.size > 1) commandExecute(command!!, tokens[1])
                 else commandExecute(command!!, null)
+                println(executionResponse)
             }
             catch(e: Exception){
                 var executionCode=ExecutionCode.EXCEPTION
@@ -63,7 +66,30 @@ class RunManager(private val commandManager: CommandManager,private val client: 
      * @argument command to execute [Command]
      * @author Markov Maxim 2023
      */
-    private fun commandExecute(command: Command, argument: String?): Response {
-        return command.execute(argument)
+    private fun commandExecute(command: Command, argument: String?): String? {
+        val response=command.execute(argument)
+        val responseCode=response.responseCode
+        val message=response.message
+        val exceptionData=response.exceptionData
+        val commandID=response.commandID
+        //val hashSetMovie=response.hashSetMovie
+        //val hashSetLong=response.hashSetLong
+
+        var rez: String?
+        rez=null
+
+        if(responseCode==ResponseCode.OK){
+            if (exceptionData==null){
+                if (message=="Movie set"){
+                    rez=message
+                }
+                else{
+                    rez=message
+                }
+            }
+        }
+
+
+        return rez
     }
 }
