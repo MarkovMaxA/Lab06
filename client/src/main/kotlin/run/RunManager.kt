@@ -1,13 +1,11 @@
 package client.run
 
-import ch.qos.logback.core.net.server.Client
 import client.commands.Command
 import client.console.ConsoleManager
 import client.net.UDPClient
 import commands.CommandManager
-import common.CommandID
-import common.net.responses.Response
 import common.net.responses.ResponseCode
+import common.net.responses.UniqueCommandResponse
 
 /**
  * Command execution code
@@ -21,7 +19,7 @@ enum class ExecutionCode {
 /**
  * Progrum runtime representative class
  */
-class RunManager(private val commandManager: CommandManager,private val client: UDPClient) {
+class RunManager(private val commandManager: CommandManager, private val client: UDPClient) {
     /**
      * run method
      *
@@ -34,13 +32,12 @@ class RunManager(private val commandManager: CommandManager,private val client: 
             val tokens = line.split(" ")
 
             val command = commandManager.getCommands()[tokens[0]]
-            try{
+            try {
                 val executionResponse = if (tokens.size > 1) commandExecute(command!!, tokens[1])
                 else commandExecute(command!!, null)
                 println(executionResponse)
-            }
-            catch(e: Exception){
-                var executionCode=ExecutionCode.EXCEPTION
+            } catch (e: Exception) {
+                var executionCode = ExecutionCode.EXCEPTION
                 ConsoleManager.consolePrint(e.javaClass.simpleName + "\n")
             }
         }
@@ -67,29 +64,48 @@ class RunManager(private val commandManager: CommandManager,private val client: 
      * @author Markov Maxim 2023
      */
     private fun commandExecute(command: Command, argument: String?): String? {
-        val response=command.execute(argument)
-        val responseCode=response.responseCode
-        val message=response.message
-        val exceptionData=response.exceptionData
-        val commandID=response.commandID
-        //val hashSetMovie=response.hashSetMovie
-        //val hashSetLong=response.hashSetLong
+        val response = command.execute(argument) as UniqueCommandResponse
+        val responseCode = response.responseCode
+        val message = response.message
+        val exceptionData = response.exceptionData
+        val commandID = response.commandID
+        val hashSetMovie = response.hashSetMovie
+        val hashSetLong = response.hashSetLong
+        val movie=response.movie
 
         var rez: String?
-        rez=null
+        rez = message
 
-        if(responseCode==ResponseCode.OK){
-            if (exceptionData==null){
-                if (message=="Movie set"){
-                    rez=message
+        if (responseCode == ResponseCode.OK) {
+            if (exceptionData == null) {
+                if (hashSetMovie!=null){
+                    rez+="\n"
+                    for (item in hashSetMovie) {
+                        rez += item
+                        rez += "\n"
+                    }
                 }
-                else{
-                    rez=message
+
+                if (hashSetLong!=null){
+                    rez+="\n"
+                    for (item in hashSetLong) {
+                        rez += item
+                        rez += "\n"
+                    }
                 }
+                if (movie!=null){
+                    rez+="\n"+movie.toString()
+                }
+            } else {
+                rez = exceptionData.toString()
             }
+        } else {
+            rez = responseCode.toString()
         }
-
-
         return rez
     }
+
+
+
+
 }
