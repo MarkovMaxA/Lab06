@@ -4,8 +4,12 @@ import client.commands.Command
 import client.console.ConsoleManager
 import client.net.UDPClient
 import commands.CommandManager
+import common.CommandArgumentException
 import common.net.responses.ResponseCode
 import common.net.responses.UniqueCommandResponse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.net.PortUnreachableException
 
 /**
  * Command execution code
@@ -23,22 +27,35 @@ class RunManager(private val commandManager: CommandManager, private val client:
     /**
      * run method
      *
-     * @author Markov Maxim 2023S
+     * @author Denis Berman
      */
     fun run(commandManager: CommandManager) {
+        var secs=5
+        val logger: Logger = LoggerFactory.getLogger(UDPClient::class.java)
         while (ConsoleManager.hasNext()) {
             val line = ConsoleManager.getNextLine()
 
             val tokens = line.split(" ")
 
             val command = commandManager.getCommands()[tokens[0]]
-            try {
-                val executionResponse = if (tokens.size > 1) commandExecute(command!!, tokens[1])
-                else commandExecute(command!!, null)
-                println(executionResponse)
-            } catch (e: Exception) {
-                var executionCode = ExecutionCode.EXCEPTION
-                ConsoleManager.consolePrint(e.javaClass.simpleName + "\n")
+            while(!false){
+                try {
+                    val executionResponse = if (tokens.size > 1) commandExecute(command!!, tokens[1])
+                    else commandExecute(command!!, null)
+
+                    println(executionResponse)
+                } catch (e: PortUnreachableException) {
+                    logger.error("Server is busy, next try in "+secs.toString()+" secs!")
+                    Thread.sleep(secs.toLong()*1000)
+                    secs+=5
+                    continue}
+                catch(e: NullPointerException){
+                    logger.error("Don't know this command!")
+                }
+                catch(e: CommandArgumentException){
+                    logger.error(e.message!!)
+                }
+                break
             }
         }
     }
@@ -77,7 +94,7 @@ class RunManager(private val commandManager: CommandManager, private val client:
         rez = message
 
         if (responseCode == ResponseCode.OK) {
-            if (exceptionData == null) {
+
                 if (hashSetMovie!=null){
                     rez+="\n"
                     for (item in hashSetMovie) {
@@ -96,16 +113,15 @@ class RunManager(private val commandManager: CommandManager, private val client:
                 if (movie!=null){
                     rez+="\n"+movie.toString()
                 }
-            } else {
-                rez = exceptionData.toString()
             }
-        } else {
+        else {
+        if (exceptionData == null) {
             rez = responseCode.toString()
+        }
+        else {
+            rez = exceptionData.toString()
+        }
         }
         return rez
     }
-
-
-
-
 }

@@ -31,7 +31,7 @@ class UDPClient(address: InetAddress, port: Int) {
     fun SetConnection(){
         client = DatagramChannel.open().bind(null).connect(address)
         client!!.configureBlocking(false)
-        logger.info("client connected to the server, address=$address")
+        logger.info("client started and ready to listen command, address=$address")
 
 
     }
@@ -39,10 +39,12 @@ class UDPClient(address: InetAddress, port: Int) {
     fun sendAndReceiveCommand(request: UniqueCommandRequest): UniqueCommandResponse {
         val dataToSend= ProtoBuf.encodeToByteArray(request)
         sendData(dataToSend)
+        logger.info("Data sended to $address")
         return ProtoBuf.decodeFromByteArray<UniqueCommandResponse>(receiveData())
     }
 
     private fun sendData(data: ByteArray) {
+
         val ret = Array(Math.ceil(data.size / DATA_SIZE.toDouble()).toInt()) {
             ByteArray(
                 DATA_SIZE
@@ -85,6 +87,7 @@ class UDPClient(address: InetAddress, port: Int) {
             result += Arrays.copyOf(data, data.size - 1)
         }
         val size = BigInteger(1, result.copyOf(4)).toInt()
+        logger.info("Data recieved from $address")
         return result.copyOfRange(4, 4 + size)
     }
 
