@@ -2,16 +2,17 @@ package client
 
 import client.net.UDPClient
 import client.commands.*
-import commands.CommandManager
+import client.commands.CommandManager
 import client.run.*
 import java.net.*
+
 fun main() {
     val commandManager = CommandManager()
-    
-    val PORT=22837
+
+    val PORT = 22837
 
     var client = UDPClient(InetAddress.getLocalHost(), PORT)
-    
+
     commandManager.addCommand(AddCommand(client))
     commandManager.addCommand(AddIfMaxCommand(client))
     commandManager.addCommand(AddIfMinCommand(client))
@@ -25,7 +26,7 @@ fun main() {
     commandManager.addCommand(RemoveLowerCommand(client))
     commandManager.addCommand(ShowCommand(client))
     commandManager.addCommand(UpdateCommand(client))
-    val runManager = RunManager(commandManager,client)
+    val runManager = RunManager(commandManager, client)
 
     client.SetConnection()
     runManager.run(commandManager)

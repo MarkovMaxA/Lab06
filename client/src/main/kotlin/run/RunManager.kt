@@ -3,22 +3,13 @@ package client.run
 import client.commands.Command
 import client.console.ConsoleManager
 import client.net.UDPClient
-import commands.CommandManager
+import client.commands.CommandManager
 import common.CommandArgumentException
 import common.net.responses.ResponseCode
 import common.net.responses.UniqueCommandResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.PortUnreachableException
-
-/**
- * Command execution code
- */
-enum class ExecutionCode {
-    COMPLETED,
-    NO_COMMAND,
-    EXCEPTION
-}
 
 /**
  * Progrum runtime representative class

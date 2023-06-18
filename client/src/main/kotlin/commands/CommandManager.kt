@@ -1,6 +1,4 @@
-package commands
-import client.commands.Command
-import commands.*
+package client.commands
 
 class CommandManager {
     private val commands = HashMap<String, Command>() // map of commands

@@ -1,7 +1,5 @@
 package client.commands
 
-
-import client.builders.MovieBuilder
 import client.net.UDPClient
 import common.net.requests.*
 import common.net.responses.*
