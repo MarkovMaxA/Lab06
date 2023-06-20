@@ -29,13 +29,13 @@ tasks.test {
 }
 
 application {
-    mainClass.set("MainClientKt")
+    mainClass.set("client.MainClientKt")
 }
 
 
 tasks.withType<Jar> {
     manifest {
-        attributes["Main-Class"] = "MainClientKt"
+        attributes["Main-Class"] = "client.MainClientKt"
         attributes["Multi-Release"] = true
 
     }
