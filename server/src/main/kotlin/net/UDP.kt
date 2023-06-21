@@ -74,24 +74,24 @@ abstract class UDP(var address: InetSocketAddress, val commandManager: CommandMa
 
             try {
                 response = commandManager.handle(request)
-                logger.info("Created response $response")
+                logger.info("Created response ${response.commandIDC}")
             } catch (e: Exception) {
                 logger.error("Command error $e", e)
                 continue
             }
 
             val dataToSend = ProtoBuf.encodeToByteArray(response)
-            logger.info("Ответ: $response")
+            //logger.info("Response: $response")
 
             try {
                 send(dataToSend, data.second!!)
-                logger.info("Отправлен ответ клиенту ${data.second}")
+                logger.info("Data sent to client: ${data.second}")
             } catch (e: java.lang.Exception) {
-                logger.error("Ошибка ввода-вывода : $e", e)
+                logger.error("I/O Error : $e", e)
             }
 
             disconnect()
-            logger.info("Сервер отключен")
+            logger.info("Server disconnected")
         }
 
         close()
